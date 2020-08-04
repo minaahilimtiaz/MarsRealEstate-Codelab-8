@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.android.marsrealestate.R
 import com.example.android.marsrealestate.databinding.FragmentOverviewBinding
 
@@ -49,6 +50,11 @@ class OverviewFragment : Fragment() {
 
         // Giving the binding access to the OverviewViewModel
         binding.viewModel = viewModel
+
+        val adapter = PhotoGridAdapter()
+        val layoutManager = GridLayoutManager(activity, 2, GridLayoutManager.VERTICAL, false)
+        binding.photosGrid.adapter = adapter
+       binding.photosGrid.layoutManager=layoutManager
 
         setHasOptionsMenu(true)
         return binding.root

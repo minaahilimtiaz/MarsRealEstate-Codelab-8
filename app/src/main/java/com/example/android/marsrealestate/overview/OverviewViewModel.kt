@@ -21,14 +21,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.android.marsrealestate.network.MarsApi
+import com.example.android.marsrealestate.network.MarsProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-/**
- * The [ViewModel] that is attached to the [OverviewFragment].
- */
+enum class MarsApiStatus { LOADING, ERROR, DONE }
+
 class OverviewViewModel : ViewModel() {
     private val viewModelJob = Job ()
     private val coroutineScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -36,6 +36,15 @@ class OverviewViewModel : ViewModel() {
     val response: LiveData<String>
         get() = _response
 
+    private val _properties = MutableLiveData<List<MarsProperty>>()
+    val properties: LiveData<List<MarsProperty>>
+        get() = _properties
+
+    private val _status = MutableLiveData<MarsApiStatus>()
+    val status: LiveData<MarsApiStatus>
+        get() = _status
+
+    private var count: Int =-1
     init {
         getMarsRealEstateProperties()
     }
@@ -45,13 +54,14 @@ class OverviewViewModel : ViewModel() {
         coroutineScope.launch {
             var propertiesDeferredObj = MarsApi.retrofitService.getProperties()
             try {
+                _status.value = MarsApiStatus.LOADING
                 val propertiesList = propertiesDeferredObj.await()
-                _response.value = "Found" + propertiesList?.size+ " record for Mars properties"
-
+                _status.value = MarsApiStatus.DONE
+                _properties.value = propertiesList
             } catch (e: Exception) {
-                _response.value = "Request Failed " + e.message
+                _status.value = MarsApiStatus.ERROR
+                _properties.value = ArrayList()
             }
-            println("I am everywhere")
         }
     }
 }
